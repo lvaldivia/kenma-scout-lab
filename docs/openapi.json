@@ -1,0 +1,1030 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kenma Scout — laboratorio intencionalmente vulnerable",
+    "version": "1.0.0",
+    "description": "Burp Suite Day Perú 2026. Datos ficticios. No usar en producción. La caché del authorizer vulnerable dura 300 s por token y reutiliza Allow o Deny para todos los verbos/rutas. El modo fixed desactiva esa caché y aplica autorización de dominio. CloudFront no cachea /api/*. Los errores de Gateway pueden usar message.",
+    "contact": {
+      "name": "Luis Valdivia Humareda"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:3000/api",
+      "description": "Node o Docker local"
+    },
+    {
+      "url": "https://{distribution}/api",
+      "description": "CloudFront (output CloudFrontApiUrl)",
+      "variables": {
+        "distribution": {
+          "default": "example.cloudfront.net"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/config": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Configuración pública del laboratorio",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Login local o Cognito; token access de 1 hora",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Perfil de la identidad autenticada",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchMe",
+        "summary": "Actualizar perfil; mass assignment en modo vulnerable",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfilePatch"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "operationId": "getTeams",
+        "summary": "Equipos ficticios",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Teams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "operationId": "listReports",
+        "summary": "Solo los reportes del equipo autenticado; sin paginación en esta demo",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}-[0-9]{3}$"
+          },
+          "example": "KAR-003"
+        }
+      ],
+      "get": {
+        "operationId": "getReport",
+        "summary": "Leer reporte; BOLA intencional en vulnerable",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteReport",
+        "summary": "Borrar reporte; requiere coach y mismo equipo en fixed",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deleted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lab/reset": {
+      "post": {
+        "operationId": "resetLocal",
+        "summary": "Solo local: restaura usuarios, reportes y caché; AWS devuelve 404",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lab/mode": {
+      "post": {
+        "operationId": "setLocalMode",
+        "summary": "Solo local: cambia modo y restaura datos y caché; AWS devuelve 404",
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "JSON o campos inválidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales o token ausente, inválido o caducado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso denegado por dominio o authorizer; API Gateway puede responder {message} en lugar de {error}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Objeto o ruta inexistente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mode"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "username",
+          "name",
+          "team",
+          "role",
+          "bio"
+        ]
+      },
+      "Report": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "opponent": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "formation": {
+            "type": "string"
+          },
+          "risk": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "play": {
+            "type": "string"
+          },
+          "weakness": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "attack": {
+                "type": "number"
+              },
+              "defense": {
+                "type": "number"
+              },
+              "serve": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "attack",
+              "defense",
+              "serve"
+            ]
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "team",
+          "ownerId",
+          "title",
+          "play"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "accessToken",
+          "expiresIn"
+        ]
+      },
+      "ProfilePatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "bio": {
+            "type": "string",
+            "maxLength": 280
+          }
+        },
+        "additionalProperties": true,
+        "description": "fixed acepta únicamente name y bio. vulnerable permite campos adicionales, incluidos role y team (mass assignment intencional)."
+      },
+      "Config": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "vulnerable",
+              "fixed"
+            ]
+          },
+          "runtime": {
+            "type": "string",
+            "enum": [
+              "local",
+              "aws"
+            ]
+          },
+          "auth": {
+            "type": "string"
+          },
+          "localControls": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "mode",
+          "runtime",
+          "localControls"
+        ]
+      },
+      "ReportList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Report"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "Teams": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "motto": {
+                  "type": "string"
+                },
+                "animal": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ]
+      },
+      "Deleted": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "deleted"
+        ]
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "Mode": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "vulnerable",
+              "fixed"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "mode"
+        ]
+      }
+    }
+  }
+}

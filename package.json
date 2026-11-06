@@ -1,0 +1,25 @@
+{
+  "name": "kenma-scout-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scouting API · Burp Suite Day Perú 2026",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node --watch backend/server.mjs",
+    "start": "node backend/server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs",
+    "build:extension": "node scripts/build-extension.mjs",
+    "test:extension": "node scripts/build-extension.mjs --test",
+    "aws:deploy": "node scripts/aws.mjs deploy",
+    "aws:frontend": "node scripts/aws.mjs frontend",
+    "aws:reset": "node scripts/aws.mjs reset",
+    "aws:outputs": "node scripts/aws.mjs outputs",
+    "aws:flush-cache": "node scripts/aws.mjs flush-cache",
+    "aws:delete": "node scripts/aws.mjs delete",
+    "test:aws": "node scripts/test-aws.mjs",
+    "seed:aws": "node scripts/aws.mjs seed"
+  }
+}

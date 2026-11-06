@@ -1,0 +1,233 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Kenma Scout - laboratorio intencionalmente vulnerable - Burp Suite Day Peru 2026
+Parameters:
+  LabMode:
+    Type: String
+    Default: vulnerable
+    AllowedValues: [vulnerable, fixed]
+  AllowedOrigin:
+    Type: String
+    Default: http://localhost:3000
+    Description: Origen exacto del frontend (sin barra final)
+Conditions:
+  Vulnerable: !Equals [!Ref LabMode, vulnerable]
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 12
+    MemorySize: 256
+    Environment:
+      Variables:
+        LAB_MODE: !Ref LabMode
+        TABLE_NAME: !Ref ScoutTable
+        USER_POOL_ID: !Ref UserPool
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
+Resources:
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+  FrontendAccess:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-s3'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${AWS::StackName} - laboratorio educativo'
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        Origins:
+          - Id: frontend
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !Ref FrontendAccess
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+          - Id: api
+            DomainName: !Sub '${ScoutApi}.execute-api.${AWS::Region}.amazonaws.com'
+            OriginPath: /demo
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
+        DefaultCacheBehavior:
+          TargetOriginId: frontend
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: api
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+            CachedMethods: [GET, HEAD]
+            # CachingDisabled + AllViewerExceptHostHeader: preserves bearer tokens.
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ErrorCachingMinTTL: 0
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${FrontendBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+  ScoutApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: demo
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowOrigin: !Sub "'${AllowedOrigin}'"
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+      Auth:
+        DefaultAuthorizer: ScoutAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          ScoutAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+            FunctionPayloadType: TOKEN
+            Identity:
+              Header: Authorization
+              ReauthorizeEvery: !If [Vulnerable, 300, 0]
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingBurstLimit: 20
+          ThrottlingRateLimit: 10
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: lambda.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ScoutTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ScoutApi
+            Path: /api/{proxy+}
+            Method: ANY
+        Login:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ScoutApi
+            Path: /api/auth/login
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        Config:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ScoutApi
+            Path: /api/config
+            Method: GET
+            Auth:
+              Authorizer: NONE
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: lambda.authorizer
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScoutTable
+  ScoutTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows: [ALLOW_USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+      PreventUserExistenceErrors: ENABLED
+      AccessTokenValidity: 1
+      TokenValidityUnits:
+        AccessToken: hours
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ApiFunction}'
+      RetentionInDays: 3
+  AuthorizerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AuthorizerFunction}'
+      RetentionInDays: 3
+Outputs:
+  WebsiteUrl:
+    Value: !Sub 'https://${Distribution.DomainName}'
+  CloudFrontApiUrl:
+    Value: !Sub 'https://${Distribution.DomainName}/api'
+  FrontendBucketName:
+    Value: !Ref FrontendBucket
+  DistributionId:
+    Value: !Ref Distribution
+  ApiId:
+    Value: !Ref ScoutApi
+  ApiBaseUrl:
+    Value: !Sub 'https://${ScoutApi}.execute-api.${AWS::Region}.amazonaws.com/demo/api'
+  TableName:
+    Value: !Ref ScoutTable
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient

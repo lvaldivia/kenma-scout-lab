@@ -1,0 +1,17 @@
+node_modules/
+.aws-sam/
+.env
+.env.*
+!.env.example
+dist/
+coverage/
+*.log
+*.tfstate*
+samconfig.toml
+.DS_Store
+.tools/
+.local/
+extension/build/
+extension/lib/
+docs/recording-guide.md
+docs/validation.md

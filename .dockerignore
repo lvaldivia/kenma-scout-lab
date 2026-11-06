@@ -1,0 +1,11 @@
+.git
+.tools
+.local
+**/node_modules
+.aws-sam
+dist
+extension
+tests
+docs
+.env*
+*.log

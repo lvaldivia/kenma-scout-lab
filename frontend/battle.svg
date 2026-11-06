@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 490" role="img" aria-labelledby="title desc">
+  <title id="title">Nekoma contra Karasuno</title>
+  <desc id="desc">Ilustración vectorial de los uniformes rojo número cinco y negro con naranja número diez, un gato, un cuervo y un balón de voleibol.</desc>
+  <defs>
+    <pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.7" fill="#fff" opacity=".13"/></pattern>
+    <pattern id="net" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#fff" stroke-width="1" opacity=".22"/></pattern>
+    <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="0" flood-color="#080c13" flood-opacity=".4"/></filter>
+  </defs>
+  <path d="M0 0H450L250 490H0Z" fill="#da1832"/>
+  <path d="M450 0H720V490H250Z" fill="#111722"/>
+  <path d="m450 0-200 490h18L468 0Z" fill="#ff7900"/>
+  <path d="M0 0H720V490H0Z" fill="url(#dots)"/>
+  <g stroke="#fff" opacity=".3" stroke-width="3"><path d="m0 72 181 74M0 106l126 45M0 377l178-55M720 64 557 140M720 100l-110 58M720 360l-146-44"/></g>
+  <path d="M0 333H720V490H0Z" fill="url(#net)"/>
+  <path d="M0 332H720" stroke="#fff" stroke-width="7"/>
+  <!-- Original mascot silhouettes and uniform artwork; no external assets. -->
+  <g fill="#191b25" opacity=".65"><path d="m64 123 2-93 55 45 68-4 49-48 9 94-37 58-79 12Z"/><path d="m87 124 42 15-14 13Zm104 0-40 15 14 13Z" fill="#fff4da"/></g>
+  <g fill="#ff7900" opacity=".9"><path d="m523 98 45-35 29 22 58-22-34 42 67-2-68 28 55 13-69 9-16 41-28-37-52-10 43-19Z"/><circle cx="578" cy="94" r="4" fill="#141b27"/></g>
+  <g transform="translate(72 140) rotate(-9 120 100)" filter="url(#shadow)">
+    <path d="m78 12-62 28-34 73 60 27 21-35-9 164h163l-9-164 21 35 60-27-34-73-62-28-22 20h-71Z" fill="#ec203e" stroke="#101722" stroke-width="8" stroke-linejoin="round"/>
+    <path d="m78 12 22 35h71l22-35-22 20h-71Z" fill="#111722"/>
+    <path d="m17 40 25 100 21-35 6-88ZM255 40l-26 100-21-35-6-88Z" fill="#111722"/>
+    <path d="m55 245 160-1M40 123l-51-24M232 123l48-24" fill="none" stroke="#fff4df" stroke-width="5"/>
+    <text x="136" y="91" text-anchor="middle" fill="#fff7e8" font-family="Arial,sans-serif" font-size="19" font-weight="900" letter-spacing="4">NEKOMA</text>
+    <text x="136" y="212" text-anchor="middle" fill="#fff7e8" stroke="#101722" stroke-width="2" paint-order="stroke" font-family="Arial,sans-serif" font-size="119" font-weight="900">5</text>
+  </g>
+  <g transform="translate(400 135) rotate(9 120 100)" filter="url(#shadow)">
+    <path d="m78 12-62 28-34 73 60 27 21-35-9 164h163l-9-164 21 35 60-27-34-73-62-28-22 20h-71Z" fill="#171e2b" stroke="#080d16" stroke-width="8" stroke-linejoin="round"/>
+    <path d="m78 12 22 35h71l22-35-22 20h-71Z" fill="#ff7900"/>
+    <path d="m17 40 25 100 21-35 6-88ZM255 40l-26 100-21-35-6-88Z" fill="#ff7900"/>
+    <path d="m55 245 160-1M40 123l-51-24M232 123l48-24" fill="none" stroke="#ff7900" stroke-width="5"/>
+    <text x="136" y="91" text-anchor="middle" fill="#fff7e8" font-family="Arial,sans-serif" font-size="17" font-weight="900" letter-spacing="3">KARASUNO</text>
+    <text x="136" y="212" text-anchor="middle" fill="#fff7e8" stroke="#ff7900" stroke-width="2" paint-order="stroke" font-family="Arial,sans-serif" font-size="113" font-weight="900">10</text>
+  </g>
+  <g transform="translate(357 103) rotate(-20)" stroke="#111722" stroke-width="4">
+    <circle r="51" fill="#fff9e6"/>
+    <path d="M-49-11Q-3-39 42-29L19 0Q-11-16-49-11M19 0q22 19 17 36M-14 49q-7-36 33-49M-36-36q14 41 49 48" fill="none"/>
+    <path d="M-49-11Q-3-39 42-29L19 0Q-11-16-49-11Z" fill="#ffce21"/>
+    <path d="M19 0q22 19 17 36L5 50Q-3 20 19 0Z" fill="#225cb5"/>
+  </g>
+  <path d="m329 214 34-43-6 32 36-13-43 52 7-32Z" fill="#fff5db" stroke="#111722" stroke-width="4"/>
+  <g font-family="Arial,sans-serif" font-weight="900" text-anchor="middle" fill="#fff6e6">
+    <text x="175" y="450" font-size="28" letter-spacing="5">NEKOMA</text>
+    <text x="550" y="450" font-size="28" letter-spacing="4">KARASUNO</text>
+    <text x="363" y="446" font-size="33" font-style="italic" fill="#ff7900">VS</text>
+    <text x="175" y="472" font-size="10" letter-spacing="3">KENMA KOZUME · CONNECT</text>
+    <text x="550" y="472" font-size="10" letter-spacing="3">SHŌYŌ HINATA · FLY HIGH</text>
+  </g>
+</svg>

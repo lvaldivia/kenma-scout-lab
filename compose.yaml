@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: .
+    environment:
+      LAB_MODE: ${LAB_MODE:-vulnerable}
+    expose:
+      - "3000"
+    init: true
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
